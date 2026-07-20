@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(wsl -e bash -lc \"cd /mnt/c/Users/ssd90/project/Assignment1 && echo '--- log ---' && git log --oneline -20 2>&1 | head -20 && echo '--- .env in history ---' && git log --all --oneline -- .env 2>&1 | head && echo '--- tracked files ---' && git ls-files | head -20 && echo '\\(end\\)'\")"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+[tool.pytest.ini_options]
+# Put the project root on sys.path so tests can `import planner` no matter how
+# pytest is invoked (`pytest`, `pytest tests/`, `python -m pytest`, or from an
+# IDE's test runner). Without this, only `python -m pytest` happens to work,
+# because the `-m` flag implicitly adds the working directory.
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"

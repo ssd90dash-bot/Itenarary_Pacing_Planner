@@ -1,0 +1,13 @@
+streamlit>=1.40
+openai>=1.60
+pydantic>=2.9
+python-dotenv>=1.0
+# Ship with Streamlit, but imported directly by planner/charts.py.
+altair>=5.0
+pandas>=2.0
+# Local token counting, for comparison against what the API bills.
+tiktoken>=0.7
+# PDF report generation (scripts/make_report.py).
+reportlab>=4.0
+matplotlib>=3.8
+pytest>=8.0
