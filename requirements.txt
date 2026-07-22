@@ -1,3 +1,4 @@
+# --- Core planner + Streamlit frontend ---
 streamlit>=1.40
 openai>=1.60
 pydantic>=2.9
@@ -5,9 +6,25 @@ python-dotenv>=1.0
 # Ship with Streamlit, but imported directly by planner/charts.py.
 altair>=5.0
 pandas>=2.0
+
+# --- Cost evaluation features ---
 # Local token counting, for comparison against what the API bills.
 tiktoken>=0.7
+# Charts for the Cost Lab, Cost-at-scale and the PDF report.
+matplotlib>=3.8
 # PDF report generation (scripts/make_report.py).
 reportlab>=4.0
-matplotlib>=3.8
+
+# --- HTML frontend (web/, run_web.py) ---
+fastapi>=0.110
+uvicorn[standard]>=0.29
+jinja2>=3.1
+# Required by FastAPI for HTML form parsing (Request.form()).
+python-multipart>=0.0.9
+# Required by Starlette's SessionMiddleware to sign the session cookie.
+itsdangerous>=2.0
+
+# --- Tests only ---
 pytest>=8.0
+# Required by fastapi.testclient.TestClient (tests/test_web.py).
+httpx>=0.27

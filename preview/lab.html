@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cost Lab · Itinerary Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          colors: {
+            surface: { light: '#fcfcfb', dark: '#1a1a19' },
+            ink: '#0b0b0b',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    [x-cloak] { display: none; }
+    .badge-low { color: #008300; }
+    .badge-moderate { color: #c98500; }
+    .badge-high { color: #d03b3b; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  </style>
+</head>
+<body class="h-full bg-[#f9f9f7] text-slate-800 dark:bg-[#0d0d0d] dark:text-slate-100">
+  <div class="min-h-full">
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-black/40 backdrop-blur sticky top-0 z-20">
+      <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-2 font-semibold text-lg">
+          <span>🧭</span><span>Itinerary Planner</span>
+        </a>
+        <nav class="flex items-center gap-1 text-sm">
+          
+          
+            <a href="/"
+               class="px-3 py-1.5 rounded-md transition
+               hover:bg-slate-100 dark:hover:bg-slate-800">
+              🗓️ Plan
+            </a>
+          
+            <a href="/scale"
+               class="px-3 py-1.5 rounded-md transition
+               hover:bg-slate-100 dark:hover:bg-slate-800">
+              📈 Scale
+            </a>
+          
+            <a href="/lab"
+               class="px-3 py-1.5 rounded-md transition
+               bg-blue-600 text-white">
+              🧪 Cost Lab
+            </a>
+          
+        </nav>
+      </div>
+      
+    </header>
+
+    
+
+    <main class="mx-auto max-w-6xl px-4 py-6">
+      
+<div class="space-y-6">
+  <div>
+    <h2 class="text-xl font-semibold">🧪 Cost Lab</h2>
+    <p class="text-sm text-slate-500">
+      Runs the <strong>same trip</strong> across a grid of temperature × max output tokens, measuring
+      what each combination costs — and whether it still produces a valid itinerary.
+    </p>
+  </div>
+
+  
+  <div class="rounded-md bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 text-sm dark:bg-blue-950/40 dark:border-blue-900 dark:text-blue-200">
+    <strong>Generate one itinerary first.</strong> The Lab sweeps that trip and estimates cost from the real run
+    rather than guessing. <a href="/" class="underline">Plan a trip →</a>
+  </div>
+  
+</div>
+
+    </main>
+
+    <footer class="mx-auto max-w-6xl px-4 py-8 text-xs text-slate-400">
+      Model <code>gpt-4o-mini</code> · Streamlit version still available via <code>streamlit run app.py</code>
+    </footer>
+  </div>
+  
+<script>window.PER_RUN_COST = 0.0;</script>
+<script src="lab.js"></script>
+
+</body>
+</html>

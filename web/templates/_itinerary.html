@@ -1,0 +1,125 @@
+<div class="space-y-4">
+  <div class="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 text-sm dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-200">
+    {{ result.notes }}
+  </div>
+
+  {% if result.trim_notes %}
+  <div class="rounded-md bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-200">
+    <p class="font-medium">Adjusted to stay within the energy budgets:</p>
+    <ul class="list-disc ml-5 mt-1">{% for n in result.trim_notes %}<li>{{ n }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <!-- Day cards -->
+  {% for day in result.days %}
+  <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+    <div class="flex items-center justify-between gap-3 mb-2">
+      <h3 class="font-semibold">{{ day.headline }}</h3>
+      <span class="text-xs text-slate-500 whitespace-nowrap">{{ day.used }} / {{ '%g' % day.points }} pts</span>
+    </div>
+    <div class="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-3">
+      <div class="h-full bg-blue-500" style="width: {{ (day.pct * 100) | round(0) }}%"></div>
+    </div>
+    <p class="text-sm text-slate-500 italic mb-3">{{ day.summary }}</p>
+
+    <div class="grid md:grid-cols-[1fr_260px] gap-4">
+      <div class="space-y-3">
+        {% for a in day.activities %}
+        <div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-sm font-medium">{{ a.time }} · {{ a.name }}</span>
+            <span class="text-xs badge-{{ a.intensity }}">{{ a.badge }}</span>
+            <span class="text-xs text-slate-400">{{ a.interest }}</span>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-300">{{ a.description }}</p>
+          <p class="text-xs text-slate-400 italic">Why this fits you: {{ a.why }}</p>
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-400 italic">Nothing scheduled — this day is yours.</p>
+        {% endfor %}
+      </div>
+
+      <div class="space-y-3 text-sm">
+        {% if day.rests %}
+        <div>
+          <p class="font-medium text-slate-500 text-xs uppercase tracking-wide">🛌 Rest</p>
+          {% for r in day.rests %}<p class="text-slate-600 dark:text-slate-300">{{ r.time }} · {{ r.note }}</p>{% endfor %}
+        </div>
+        {% endif %}
+        {% if day.meals %}
+        <div>
+          <p class="font-medium text-slate-500 text-xs uppercase tracking-wide">🍽️ Meals</p>
+          {% for m in day.meals %}
+          <p class="text-slate-600 dark:text-slate-300">{{ m.time }} {{ m.slot }} — {{ m.suggestion }}</p>
+          <p class="text-xs text-slate-400">{{ m.note }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if day.reasons %}
+        <div>
+          <p class="font-medium text-slate-500 text-xs uppercase tracking-wide">⚖️ Why this pace</p>
+          {% for reason in day.reasons %}<p class="text-xs text-slate-400">• {{ reason }}</p>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Download -->
+  <form action="/download" method="post">
+    <input type="hidden" name="markdown" value="{{ result.markdown | e }}">
+    <input type="hidden" name="name" value="{{ form.destination or 'itinerary' }}">
+    <button class="text-sm rounded-md border border-slate-300 dark:border-slate-700 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+      ⬇ Download itinerary (markdown)
+    </button>
+  </form>
+
+  <!-- Token usage -->
+  <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+    <h3 class="font-semibold mb-3">🎟️ Token usage for this itinerary</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+      <div><div class="text-2xl font-semibold">{{ result.usage.input_tokens | commas }}</div><div class="text-xs text-slate-500">input</div></div>
+      <div><div class="text-2xl font-semibold">{{ result.usage.output_tokens | commas }}</div><div class="text-xs text-slate-500">output</div></div>
+      <div><div class="text-2xl font-semibold">{{ result.usage.total_tokens | commas }}</div><div class="text-xs text-slate-500">total</div></div>
+      <div><div class="text-2xl font-semibold">{{ result.usage_cost }}</div><div class="text-xs text-slate-500">est. cost</div></div>
+    </div>
+    {% if result.usage.call_count > 1 %}
+    <p class="text-xs text-slate-500 mt-3">{{ result.usage.call_count }} API calls — the repair loop ran because the first draft broke a rule.</p>
+    {% endif %}
+
+    <!-- Tokenizer check -->
+    {% if result.tokenizer %}
+    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+      <h4 class="font-medium text-sm mb-1">Tokenizer check — local count vs billed</h4>
+      <p class="text-xs text-slate-500 mb-2">
+        <code>tiktoken</code> counts the prompt locally, for free, before any call. It will not match the bill — the gap is the point.
+      </p>
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div><div class="text-xl font-semibold">{{ result.tokenizer.local_estimate | commas }}</div><div class="text-xs text-slate-500">counted locally</div></div>
+        <div><div class="text-xl font-semibold">{{ result.tokenizer.api_reported | commas }}</div><div class="text-xs text-slate-500">billed by API</div></div>
+        <div>
+          <div class="text-xl font-semibold">{{ '%+d' % result.tokenizer.delta }}</div>
+          <div class="text-xs text-slate-500">{% if result.tokenizer.delta_pct is not none %}{{ '%+.0f' % result.tokenizer.delta_pct }}%{% endif %}</div>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2">{{ result.tokenizer.explanation }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Cost on every model -->
+    <details class="mt-4">
+      <summary class="text-sm text-slate-600 dark:text-slate-300 cursor-pointer font-medium">Cost on every model</summary>
+      <table class="mt-2 w-full text-sm">
+        <thead class="text-xs text-slate-400 text-left"><tr><th class="py-1">Model</th><th>Cost</th><th>vs cheapest</th></tr></thead>
+        <tbody>
+          {% for m in result.model_costs %}
+          <tr class="border-t border-slate-100 dark:border-slate-800"><td class="py-1">{{ m.model }}</td><td>{{ m.cost }}</td><td class="text-slate-500">{{ m.ratio }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="text-xs text-slate-400 mt-2">A what-if: another model tokenises differently and would produce a different itinerary. Rates may be stale — verify at openai.com/api/pricing.</p>
+    </details>
+  </div>
+</div>
+{% if not embed %}{% endif %}

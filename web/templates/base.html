@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Itinerary Planner{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          colors: {
+            surface: { light: '#fcfcfb', dark: '#1a1a19' },
+            ink: '#0b0b0b',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    [x-cloak] { display: none; }
+    .badge-low { color: #008300; }
+    .badge-moderate { color: #c98500; }
+    .badge-high { color: #d03b3b; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  </style>
+</head>
+<body class="h-full bg-[#f9f9f7] text-slate-800 dark:bg-[#0d0d0d] dark:text-slate-100">
+  <div class="min-h-full">
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-black/40 backdrop-blur sticky top-0 z-20">
+      <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-2 font-semibold text-lg">
+          <span>🧭</span><span>Itinerary Planner</span>
+        </a>
+        <nav class="flex items-center gap-1 text-sm">
+          {% set tabs = [('plan', '/', '🗓️ Plan'), ('scale', '/scale', '📈 Scale'), ('lab', '/lab', '🧪 Cost Lab')] %}
+          {% for key, href, label in tabs %}
+            <a href="{{ href }}"
+               class="px-3 py-1.5 rounded-md transition
+               {% if nav == key %}bg-blue-600 text-white{% else %}hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+              {{ label }}
+            </a>
+          {% endfor %}
+        </nav>
+      </div>
+      {% if session_usage and session_usage.calls %}
+      <div class="border-t border-slate-100 dark:border-slate-800/60 bg-slate-50 dark:bg-slate-900/40">
+        <div class="mx-auto max-w-6xl px-4 py-1.5 flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+          <span>Session:</span>
+          <span><strong>{{ session_usage.input_tokens | commas }}</strong> in</span>
+          <span><strong>{{ session_usage.output_tokens | commas }}</strong> out</span>
+          <span><strong>{{ session_cost }}</strong> across {{ session_usage.calls }} call(s)</span>
+          <form action="/reset" method="post" class="ml-auto">
+            <button class="underline hover:text-slate-900 dark:hover:text-slate-200">reset</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    </header>
+
+    {% if not has_key %}
+    <div class="mx-auto max-w-6xl px-4 pt-4">
+      <div class="rounded-md bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 text-sm dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-200">
+        No <code>OPENAI_API_KEY</code> found. Free views (forecast, scale) work; generating an itinerary will fail until you add one to <code>.env</code>.
+      </div>
+    </div>
+    {% endif %}
+
+    <main class="mx-auto max-w-6xl px-4 py-6">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mx-auto max-w-6xl px-4 py-8 text-xs text-slate-400">
+      Model <code>{{ model }}</code> · Streamlit version still available via <code>streamlit run app.py</code>
+    </footer>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

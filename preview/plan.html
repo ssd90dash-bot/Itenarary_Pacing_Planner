@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plan a trip · Itinerary Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          colors: {
+            surface: { light: '#fcfcfb', dark: '#1a1a19' },
+            ink: '#0b0b0b',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    [x-cloak] { display: none; }
+    .badge-low { color: #008300; }
+    .badge-moderate { color: #c98500; }
+    .badge-high { color: #d03b3b; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  </style>
+</head>
+<body class="h-full bg-[#f9f9f7] text-slate-800 dark:bg-[#0d0d0d] dark:text-slate-100">
+  <div class="min-h-full">
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-black/40 backdrop-blur sticky top-0 z-20">
+      <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-2 font-semibold text-lg">
+          <span>🧭</span><span>Itinerary Planner</span>
+        </a>
+        <nav class="flex items-center gap-1 text-sm">
+          
+          
+            <a href="/"
+               class="px-3 py-1.5 rounded-md transition
+               bg-blue-600 text-white">
+              🗓️ Plan
+            </a>
+          
+            <a href="/scale"
+               class="px-3 py-1.5 rounded-md transition
+               hover:bg-slate-100 dark:hover:bg-slate-800">
+              📈 Scale
+            </a>
+          
+            <a href="/lab"
+               class="px-3 py-1.5 rounded-md transition
+               hover:bg-slate-100 dark:hover:bg-slate-800">
+              🧪 Cost Lab
+            </a>
+          
+        </nav>
+      </div>
+      
+    </header>
+
+    
+
+    <main class="mx-auto max-w-6xl px-4 py-6">
+      
+<div class="grid lg:grid-cols-[360px_1fr] gap-6">
+
+  <!-- Form -->
+  <form action="/plan" method="post" id="trip-form"
+        class="space-y-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 h-fit">
+    <div>
+      <h2 class="font-semibold text-lg mb-1">Your trip</h2>
+      <p class="text-sm text-slate-500">The plan is paced to your group's actual energy.</p>
+    </div>
+
+    <label class="block">
+      <span class="text-sm font-medium">Destination</span>
+      <input name="destination" value="" placeholder="Lisbon, Portugal"
+             class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-3 py-2 border">
+    </label>
+
+    <div class="grid grid-cols-2 gap-3">
+      <label class="block">
+        <span class="text-sm font-medium">Start</span>
+        <input type="date" name="start_date" value="2026-08-21"
+               class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-2 py-2 border">
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium">End</span>
+        <input type="date" name="end_date" value="2026-08-25"
+               class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-2 py-2 border">
+      </label>
+    </div>
+
+    <!-- Travellers -->
+    <div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-medium">Travellers (ages)</span>
+        <button type="button" onclick="addTraveller()" class="text-xs text-blue-600 hover:underline">+ add</button>
+      </div>
+      <div id="travellers" class="mt-2 flex flex-wrap gap-2">
+        
+        <input type="number" name="age" min="0" max="110" value="35"
+               class="w-20 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-2 py-1.5 border">
+        
+        <input type="number" name="age" min="0" max="110" value="35"
+               class="w-20 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-2 py-1.5 border">
+        
+      </div>
+      <p class="text-xs text-slate-400 mt-1">The youngest and oldest set the pace.</p>
+    </div>
+
+    <!-- Pit stops -->
+    <div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-medium">Pit stops</span>
+        <button type="button" onclick="addStop()" class="text-xs text-blue-600 hover:underline">+ add</button>
+      </div>
+      <div id="stops" class="mt-2 space-y-2"></div>
+      <p class="text-xs text-slate-400 mt-1">Transfers cost energy on that day.</p>
+    </div>
+
+    <!-- Food -->
+    <div>
+      <span class="text-sm font-medium">Dietary needs</span>
+      <div class="mt-1.5 flex flex-wrap gap-1.5">
+        
+        <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+          <input type="checkbox" name="food_pref" value="Vegetarian" class="sr-only"
+                 >Vegetarian
+        </label>
+        
+        <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+          <input type="checkbox" name="food_pref" value="Vegan" class="sr-only"
+                 >Vegan
+        </label>
+        
+        <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+          <input type="checkbox" name="food_pref" value="Halal" class="sr-only"
+                 >Halal
+        </label>
+        
+        <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+          <input type="checkbox" name="food_pref" value="Kosher" class="sr-only"
+                 >Kosher
+        </label>
+        
+        <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+          <input type="checkbox" name="food_pref" value="Gluten-free" class="sr-only"
+                 >Gluten-free
+        </label>
+        
+        <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+          <input type="checkbox" name="food_pref" value="Nut allergy" class="sr-only"
+                 >Nut allergy
+        </label>
+        
+        <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+          <input type="checkbox" name="food_pref" value="Dairy-free" class="sr-only"
+                 >Dairy-free
+        </label>
+        
+        <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+          <input type="checkbox" name="food_pref" value="Seafood allergy" class="sr-only"
+                 >Seafood allergy
+        </label>
+        
+      </div>
+      <input name="food_notes" value="" placeholder="e.g. loves street food, no spice"
+             class="mt-2 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-3 py-2 border">
+    </div>
+
+    <!-- Interests -->
+    <div>
+      <span class="text-sm font-medium">Interests &amp; importance</span>
+      <div class="mt-2 space-y-2">
+        
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2 text-sm w-32">
+            <input type="checkbox" name="interest" value="indoor" class="rounded"
+                   >
+            Indoor
+          </label>
+          <input type="range" name="importance_indoor" min="1" max="5"
+                 value="3" class="flex-1">
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2 text-sm w-32">
+            <input type="checkbox" name="interest" value="outdoor" class="rounded"
+                   >
+            Outdoor
+          </label>
+          <input type="range" name="importance_outdoor" min="1" max="5"
+                 value="3" class="flex-1">
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2 text-sm w-32">
+            <input type="checkbox" name="interest" value="history" class="rounded"
+                   checked>
+            History
+          </label>
+          <input type="range" name="importance_history" min="1" max="5"
+                 value="3" class="flex-1">
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2 text-sm w-32">
+            <input type="checkbox" name="interest" value="experiences" class="rounded"
+                   checked>
+            Experiences
+          </label>
+          <input type="range" name="importance_experiences" min="1" max="5"
+                 value="3" class="flex-1">
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2 text-sm w-32">
+            <input type="checkbox" name="interest" value="relaxation" class="rounded"
+                   >
+            Relaxation
+          </label>
+          <input type="range" name="importance_relaxation" min="1" max="5"
+                 value="3" class="flex-1">
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Pace -->
+    <label class="block">
+      <span class="text-sm font-medium">Overall pace</span>
+      <select name="pace" class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-3 py-2 border">
+        
+        <option value="relaxed" >Relaxed</option>
+        
+        <option value="balanced" selected>Balanced</option>
+        
+        <option value="packed" >Packed</option>
+        
+      </select>
+    </label>
+
+    <div class="flex gap-2 pt-1">
+      <button type="submit"
+              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md px-4 py-2.5 text-sm transition">
+        Plan my trip
+      </button>
+      <button type="button" onclick="loadForecast()"
+              class="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800">
+        Forecast
+      </button>
+    </div>
+    <p id="submit-note" class="text-xs text-slate-400 hidden">Contacting the model… this takes a few seconds.</p>
+  </form>
+
+  <!-- Results column -->
+  <div class="space-y-5">
+    
+
+    <div id="forecast">
+      
+      <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center text-slate-500">
+        <p class="text-sm">Fill in the trip and hit <strong>Forecast</strong> for a free energy preview,
+        or <strong>Plan my trip</strong> to generate the full itinerary.</p>
+      </div>
+      
+    </div>
+
+    
+  </div>
+</div>
+
+    </main>
+
+    <footer class="mx-auto max-w-6xl px-4 py-8 text-xs text-slate-400">
+      Model <code>gpt-4o-mini</code> · Streamlit version still available via <code>streamlit run app.py</code>
+    </footer>
+  </div>
+  
+<script>
+  function addTraveller() {
+    const box = document.getElementById('travellers');
+    const el = document.createElement('input');
+    el.type = 'number'; el.name = 'age'; el.min = 0; el.max = 110; el.value = 30;
+    el.className = 'w-20 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-2 py-1.5 border';
+    box.appendChild(el);
+  }
+  function addStop() {
+    const box = document.getElementById('stops');
+    const row = document.createElement('div');
+    row.className = 'grid grid-cols-[1fr_70px_70px] gap-2';
+    row.innerHTML = `
+      <input name="stop_place" placeholder="Sintra" class="rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-2 py-1.5 border">
+      <input name="stop_day" type="number" min="1" value="2" title="On day" class="rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-2 py-1.5 border">
+      <input name="stop_hours" type="number" min="0" step="0.5" value="2" title="Travel hrs" class="rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm text-sm px-2 py-1.5 border">`;
+    box.appendChild(row);
+  }
+  async function loadForecast() {
+    const form = document.getElementById('trip-form');
+    const res = await fetch('/forecast', { method: 'POST', body: new FormData(form) });
+    document.getElementById('forecast').innerHTML = await res.text();
+  }
+  document.getElementById('trip-form').addEventListener('submit', () => {
+    document.getElementById('submit-note').classList.remove('hidden');
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+  <h3 class="font-semibold mb-1">Energy forecast</h3>
+  <p class="text-xs text-slate-500 mb-3">Computed locally from your inputs — no itinerary generated, no cost.</p>
+  <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+    {% for c in cards %}
+    <div class="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+      <div class="text-xs text-slate-500">Day {{ c.day }}</div>
+      <div class="text-xs text-slate-400">{{ c.date }}</div>
+      <div class="text-2xl font-semibold mt-1">{{ '%g' % c.points }}</div>
+      {% if c.is_recovery %}
+      <div class="text-[11px] mt-1 text-emerald-600">🛌 recovery</div>
+      {% elif c.high_allowed %}
+      <div class="text-[11px] mt-1 text-blue-600">big day ok</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <details class="mt-3">
+    <summary class="text-xs text-slate-500 cursor-pointer">Why these numbers?</summary>
+    <ul class="mt-2 space-y-1 text-xs text-slate-500">
+      {% for c in cards %}{% if c.reasons %}
+      <li><strong>Day {{ c.day }}:</strong> {{ c.reasons | join('; ') }}</li>
+      {% endif %}{% endfor %}
+    </ul>
+  </details>
+</div>

@@ -61,13 +61,45 @@ way to shorten itineraries.
 
 ## Run
 
+There are **two interchangeable frontends** over the same `planner/` core — pick
+either; both build an identical `TripRequest` and call the same code.
+
+**Streamlit** (interactive, Altair charts):
+
 ```bash
 .venv/bin/streamlit run app.py
 ```
 
-The sidebar shows an **energy forecast** as soon as you enter travellers and
-dates. That preview is computed locally and costs nothing — only "Plan my trip"
-calls the API.
+**HTML + Tailwind** (FastAPI, at http://localhost:8000):
+
+```bash
+.venv/bin/python run_web.py
+```
+
+Both show an **energy forecast** computed locally from your inputs — free, no API
+call. Only generating an itinerary spends anything.
+
+### The HTML frontend ([`web/`](web/))
+
+A thin FastAPI adapter — no planning logic of its own. Tailwind via the Play CDN
+(no build step, no Node). Covers all three areas:
+
+| Route | What | Cost |
+|---|---|---|
+| `/` | Trip form → itinerary, token usage, tokenizer check | 1 call |
+| `/scale` | Usage-at-scale projections + chart | free |
+| `/lab` | Cost Lab sweep, streamed live over Server-Sent Events | N calls |
+
+The Cost Lab is the interesting part: `run_sweep()` is a generator, so
+[`web/main.py`](web/main.py) streams each run to the browser over SSE
+([`web/static/lab.js`](web/static/lab.js)) rather than blocking on one long
+request. The 24-run cap and the "generate one itinerary first" guard are enforced
+server-side. Charts render server-side as inline SVG (matplotlib, the validated
+palette) — static, where Streamlit's are interactive; the precise numbers sit in
+adjacent tables either way.
+
+Set `WEB_SECRET_KEY` in `.env` for a stable session-cookie key (a dev default is
+used otherwise).
 
 ## Token counting
 
@@ -182,7 +214,8 @@ validation and trimming paths. No network access required.
 | [`scripts/make_report.py`](scripts/make_report.py) | Builds the PDF cost evaluation |
 | [`planner/experiment.py`](planner/experiment.py) | Cost Lab sweep engine and aggregation |
 | [`planner/charts.py`](planner/charts.py) | Report charts (no Streamlit import, so testable) |
-| [`plan_ui.py`](plan_ui.py) / [`lab_ui.py`](lab_ui.py) | The two tab bodies |
+| [`plan_ui.py`](plan_ui.py) / [`lab_ui.py`](lab_ui.py) | Streamlit tab bodies |
+| [`web/`](web/) · [`run_web.py`](run_web.py) | FastAPI + Tailwind HTML frontend |
 | [`planner/render.py`](planner/render.py) | Markdown export and shared display helpers |
 | [`app.py`](app.py) | Streamlit UI |
 

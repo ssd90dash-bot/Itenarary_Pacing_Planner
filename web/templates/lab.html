@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Cost Lab · Itinerary Planner{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div>
+    <h2 class="text-xl font-semibold">🧪 Cost Lab</h2>
+    <p class="text-sm text-slate-500">
+      Runs the <strong>same trip</strong> across a grid of temperature × max output tokens, measuring
+      what each combination costs — and whether it still produces a valid itinerary.
+    </p>
+  </div>
+
+  {% if not has_baseline %}
+  <div class="rounded-md bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 text-sm dark:bg-blue-950/40 dark:border-blue-900 dark:text-blue-200">
+    <strong>Generate one itinerary first.</strong> The Lab sweeps that trip and estimates cost from the real run
+    rather than guessing. <a href="/" class="underline">Plan a trip →</a>
+  </div>
+  {% else %}
+
+  <div class="rounded-md bg-slate-100 dark:bg-slate-800/60 px-4 py-2 text-sm">
+    Sweeping your last trip: <strong>{{ trip_destination }}</strong> ({{ trip_days }} days).
+    Per-run cost estimated at <strong>{{ per_run_cost }}</strong>.
+  </div>
+
+  <form id="sweep-form" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <span class="text-sm font-medium">Temperatures</span>
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          {% for t in temperatures %}
+          <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+            <input type="checkbox" name="temperature" value="{{ t }}" class="sr-only" {% if t in default_temperatures %}checked{% endif %}>{{ '%g' % t }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <span class="text-sm font-medium">Output caps <span class="text-slate-400 font-normal">(max {{ max_series }})</span></span>
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          {% for c in caps %}
+          <label class="text-xs px-2 py-1 rounded-full border border-slate-300 dark:border-slate-700 cursor-pointer has-[:checked]:bg-blue-600 has-[:checked]:text-white has-[:checked]:border-blue-600">
+            <input type="checkbox" name="cap" value="{{ c }}" class="sr-only cap-box" {% if c in default_caps %}checked{% endif %}>{{ c }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-4 items-center">
+      <label class="text-sm">
+        <span class="font-medium">Samples per cell: <span id="samples-val">1</span></span>
+        <input type="range" name="samples" min="1" max="3" value="1" class="mt-2 w-full" oninput="document.getElementById('samples-val').textContent=this.value; updateEstimate()">
+      </label>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="repair" value="1" onchange="updateEstimate()"> Include the repair pass (measures end-to-end cost)
+      </label>
+    </div>
+
+    <div class="flex items-center gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+      <div class="text-sm"><span class="text-slate-500">Runs:</span> <strong id="run-count">—</strong></div>
+      <div class="text-sm"><span class="text-slate-500">Est. spend:</span> <strong id="est-cost">—</strong></div>
+      <div class="text-xs text-slate-400">hard cap 24 runs</div>
+    </div>
+
+    <label class="flex items-start gap-2 text-sm">
+      <input type="checkbox" id="confirm" onchange="document.getElementById('start-btn').disabled = !this.checked">
+      <span>I understand this makes <strong id="confirm-runs">N</strong> real API calls costing roughly <strong id="confirm-cost">$—</strong>.</span>
+    </label>
+
+    <button type="submit" id="start-btn" disabled
+            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-md px-4 py-2.5 text-sm">
+      Run sweep
+    </button>
+    <p class="text-xs text-slate-400">Once started, a sweep runs to completion. The run cap is the safety net.</p>
+  </form>
+
+  <!-- Live progress -->
+  <div id="progress" class="hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="font-semibold">Running…</h3>
+      <span class="text-sm text-slate-500" id="progress-label"></span>
+    </div>
+    <div class="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-3">
+      <div id="progress-bar" class="h-full bg-blue-500 transition-all" style="width:0%"></div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-slate-400 text-left border-b border-slate-200 dark:border-slate-700">
+          <tr><th class="py-1">T</th><th>Cap</th><th>Status</th><th>In</th><th>Out</th><th>Cost</th><th>Viol.</th></tr>
+        </thead>
+        <tbody id="run-rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Report -->
+  <div id="report" class="hidden space-y-4"></div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.PER_RUN_COST = {{ per_run_raw }};</script>
+<script src="/static/lab.js"></script>
+{% endblock %}
